@@ -1,0 +1,7 @@
+[Unit]
+Description=Example Golang OIDC App (Resource Service)
+[Service]
+Type=simple
+ExecStart=/usr/local/example-resource/example-resource
+[Install]
+WantedBy=multi-user.target
