@@ -1,5 +1,3 @@
 [example-resource]
-clientID = example-resource
-clientSecret = secret
 providerUrl = https://example.test/keycloak/realms/golang-oidc
 listenAddress = 0.0.0.0:8081

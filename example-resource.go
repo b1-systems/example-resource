@@ -10,14 +10,11 @@ import (
   "github.com/coreos/go-oidc/v3/oidc"
   "golang.org/x/net/context"
   "golang.org/x/oauth2"
-  "github.com/golang-jwt/jwt/v4"
   "gopkg.in/ini.v1"
 )
 
 var (
   clientName = "example-resource"
-  clientID = ""
-  clientSecret = ""
   providerUrl = ""
   listenAddress = ""
 )
@@ -37,20 +34,6 @@ func readIni() {
 
   cs := cfg.Section(clientName)
 
-  clientID = cs.Key("clientID").String()
-
-  if clientID == "" {
-    log.Fatal(clientName + ".ini does not specify clientID")
-    os.Exit(1)
-  }
-
-  clientSecret = cs.Key("clientSecret").String()
-
-  if clientSecret == "" {
-    log.Fatal(clientName + ".ini does not specify clientSecret")
-    os.Exit(1)
-  }
-
   providerUrl = cs.Key("providerUrl").String()
 
   if providerUrl == "" {
@@ -67,12 +50,8 @@ func readIni() {
 
   log.Printf(
     "Read configuration:\n" +
-    " clientID = %s\n" +
-    " clientSecret = %s\n" +
     " providerUrl = %s\n" +
     " listenAddress = %s\n",
-    clientID,
-    "*REDACTED*",
     providerUrl,
     listenAddress,
   )
@@ -90,10 +69,8 @@ func main() {
   }
 
   config := oauth2.Config{
-    ClientID: clientID,
-    ClientSecret: clientSecret,
     Endpoint: provider.Endpoint(),
-    Scopes: []string{oidc.ScopeOpenID, "profile", "email"},
+    Scopes: []string{oidc.ScopeOpenID, "profile", "email", "roles"},
   }
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +91,7 @@ func main() {
       })
 
       if _, err := tokenSource.Token(); err != nil {
-        log.Printf("Invalid access_token: ", err)
+        log.Printf("Invalid access token: ", err)
         http.Error(w, "Bad request", http.StatusBadRequest)
 			} else {
         if userInfo, err := provider.UserInfo(ctx, tokenSource) ; err != nil {
@@ -122,23 +99,30 @@ func main() {
           http.Error(w, "Internal error", http.StatusInternalServerError)
         } else {
           var claims struct {
-            jwt.StandardClaims
+            Sub string `json:"sub"`
             Email string `json:"email"`
             EmailVerified bool `json:"email_verified"`
+            PreferredUsername string `json:"preferred_username"`
             Name string `json:"name"`
-            ClientRoles []string `json:"client_roles"`
+            GivenName string `json:"given_name"`
+            FamilyName string `json:"family_name"`
+            Roles []string `json:"roles"`
           }
 
           if err := userInfo.Claims(&claims); err != nil {
             log.Printf("Error parsing claims from UserInfo: ", err)
             http.Error(w, "Internal error", http.StatusInternalServerError)
           } else {
-		        data, err := json.MarshalIndent(userInfo, "", "    ")
+		        data, err := json.MarshalIndent(claims, "", "    ")
 
             if err != nil {
 			        http.Error(w, err.Error(), http.StatusInternalServerError)
 		        } else {
+		          w.Write([]byte("Access token: " + access_token))
+		          w.Write([]byte("\r\n"))
+		          w.Write([]byte("Parsed userinfo claims: "))
 		          w.Write(data)
+		          w.Write([]byte("\r\n"))
             }
           }
         }
