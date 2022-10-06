@@ -93,7 +93,7 @@ func main() {
       if _, err := tokenSource.Token(); err != nil {
         log.Printf("Invalid access token: ", err)
         http.Error(w, "Bad request", http.StatusBadRequest)
-			} else {
+      } else {
         if userInfo, err := provider.UserInfo(ctx, tokenSource) ; err != nil {
           log.Printf("Error getting UserInfo: ", err)
           http.Error(w, "Internal error", http.StatusInternalServerError)
@@ -113,16 +113,16 @@ func main() {
             log.Printf("Error parsing claims from UserInfo: ", err)
             http.Error(w, "Internal error", http.StatusInternalServerError)
           } else {
-		        data, err := json.MarshalIndent(claims, "", "    ")
+            data, err := json.MarshalIndent(claims, "", "    ")
 
             if err != nil {
-			        http.Error(w, err.Error(), http.StatusInternalServerError)
-		        } else {
-		          w.Write([]byte("Access token: " + access_token))
-		          w.Write([]byte("\r\n"))
-		          w.Write([]byte("Parsed userinfo claims: "))
-		          w.Write(data)
-		          w.Write([]byte("\r\n"))
+              http.Error(w, err.Error(), http.StatusInternalServerError)
+            } else {
+              w.Write([]byte("Access token: " + access_token))
+              w.Write([]byte("\r\n"))
+              w.Write([]byte("Parsed userinfo claims: "))
+              w.Write(data)
+              w.Write([]byte("\r\n"))
             }
           }
         }
