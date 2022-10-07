@@ -118,8 +118,7 @@ func main() {
             if err != nil {
               http.Error(w, err.Error(), http.StatusInternalServerError)
             } else {
-              w.Write([]byte("Access token: " + access_token))
-              w.Write([]byte("\r\n"))
+              w.Write([]byte("--------"+clientName+"--------\r\n"))
               w.Write([]byte("Parsed userinfo claims: "))
               w.Write(data)
               w.Write([]byte("\r\n"))
