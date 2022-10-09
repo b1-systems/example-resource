@@ -1,3 +1,7 @@
+/* Demonstration of an OIDC "Resource Server", receiving an OAuth2 access token
+   and (for demonstration purpose) accessing the OIDC userinfo endpoint
+   * See also: https://openid.net/specs/openid-connect-core-1_0.html#UserInfo */
+
 package main
 
 import (
@@ -5,12 +9,11 @@ import (
   "log"
   "net/http"
   "os"
-  "path/filepath"
   "strings"
   "github.com/coreos/go-oidc/v3/oidc"
   "golang.org/x/net/context"
   "golang.org/x/oauth2"
-  "gopkg.in/ini.v1"
+  "example-resource/ini"
 )
 
 var (
@@ -19,46 +22,18 @@ var (
   listenAddress = ""
 )
 
-func readIni() {
-  ex, err := os.Executable()
-
-  if err != nil {
-    panic(err)
-  }
-
-  cfg, err := ini.Load(filepath.Join(filepath.Dir(ex), clientName + ".ini"))
-
-  if err != nil {
-    panic(err)
-  }
-
-  cs := cfg.Section(clientName)
-
-  providerUrl = cs.Key("providerUrl").String()
-
-  if providerUrl == "" {
-    log.Fatal(clientName + ".ini does not specify providerUrl")
-    os.Exit(1)
-  }
-
-  listenAddress = cs.Key("listenAddress").String()
-
-  if listenAddress == "" {
-    log.Fatal(clientName + ".ini does not specify listenAddress")
-    os.Exit(1)
-  }
-
-  log.Printf(
-    "Read configuration:\n" +
-    " providerUrl = %s\n" +
-    " listenAddress = %s\n",
-    providerUrl,
-    listenAddress,
-  )
-}
-
 func main() {
-  readIni()
+  arr := []ini.Ref{
+    {"providerUrl", &providerUrl},
+    {"listenAddress", &listenAddress}}
+
+  err := ini.ReadIni(clientName, arr)
+
+  if err != nil {
+    log.Fatal()
+    os.Exit(1)
+  }
+
 
   ctx := context.Background()
   provider, err := oidc.NewProvider(ctx, providerUrl)
@@ -70,7 +45,7 @@ func main() {
 
   config := oauth2.Config{
     Endpoint: provider.Endpoint(),
-    Scopes: []string{oidc.ScopeOpenID, "profile", "email", "roles"},
+    Scopes: []string{oidc.ScopeOpenID},
   }
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -106,7 +81,11 @@ func main() {
             Name string `json:"name"`
             GivenName string `json:"given_name"`
             FamilyName string `json:"family_name"`
-            Roles []string `json:"roles"`
+            ResourceAccess struct {
+              ExampleFrontend struct {
+                Roles []string `json:"roles"`
+              } `json:"example-frontend"`
+            } `json:"resource_access"`
           }
 
           if err := userInfo.Claims(&claims); err != nil {
