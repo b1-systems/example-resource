@@ -1,3 +1,9 @@
+/* author: B1 Systems GmbH
+ * authoremail: info@b1-systems.de
+ * license: MIT License <https://opensource.org/licenses/MIT>
+ * summary: OpenID Connect example
+ * */
+
 /* Demonstration of an OIDC "Resource Server", receiving an OAuth2 access token
    and (for demonstration purpose) accessing the OIDC userinfo endpoint
    * See also: https://openid.net/specs/openid-connect-core-1_0.html#UserInfo */
