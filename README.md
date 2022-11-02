@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-git clone https://tk-sls.de/gitlab/golang-oidc/example-resource.git
+git clone https://github.com/b1-systems/example-resource.git
 cd example-resource
 go mod tidy
 go build
