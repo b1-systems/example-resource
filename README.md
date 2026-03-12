@@ -38,6 +38,19 @@ systemctl start example-resource.service
 journalctl -xefu  example-resource.service
 ```
 
+## Start using Docker
+
+```shell
+docker build --tag example-resource .
+docker run \
+  --rm \
+  --name example-resource \
+  -e PROVIDER_URL=https://some.provider/url \
+  -e LISTEN_ADDRESS=0.0.0.0:8080 \
+  --publish 8080:8080 \
+  example-resource
+```
+
 ## Author, Copyright and License
 
 * Copyright: 2022 B1 Systems GmbH <info@b1-systems.de>
