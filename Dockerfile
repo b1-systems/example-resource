@@ -7,7 +7,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /example-resource
 
 FROM scratch AS release-stage
 COPY --from=build-stage /example-resource /example-resource
+COPY --from=build-stage /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY example-resource.ini.sample /example-resource.ini
 ENTRYPOINT ["/example-resource"]
 ENV PROVIDER_URL=
-ENV LISTEN_ADDRESS=0.0.0.0:8080
+ENV LISTEN_ADDRESS=0.0.0.0:8082

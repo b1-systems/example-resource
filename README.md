@@ -28,7 +28,7 @@ Example `example-resource.ini`:
 providerUrl = https://your_idp_server/realms/golang-oidc
 
 # Plain HTTP service address of this "example-frontend" server:
-listenAddress = 0.0.0.0:8080
+listenAddress = 0.0.0.0:8082
 ```
 
 # Start
@@ -46,13 +46,13 @@ docker run \
   --rm \
   --name example-resource \
   -e PROVIDER_URL=https://some.provider/url \
-  -e LISTEN_ADDRESS=0.0.0.0:8080 \
-  --publish 8080:8080 \
+  -e LISTEN_ADDRESS=0.0.0.0:8082 \
+  --publish 8082:8082 \
   example-resource
 ```
 
 ## Author, Copyright and License
 
-* Copyright: 2022 B1 Systems GmbH <info@b1-systems.de>
+* Copyright: 2022-2026 B1 Systems GmbH <info@b1-systems.de>
 * Author: Tilman Kranz <tilman.kranz@b1-systems.de>
 * License: MIT License <https://opensource.org/licenses/MIT>
