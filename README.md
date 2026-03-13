@@ -57,8 +57,8 @@ Create a file `docker-compose.yml`:
 
 ```yaml
 services:
-   example-backend:
-     image: example-backend:latest
+   example-resource:
+     image: example-resource:latest
      ports:
        - "9117:8082"
      environment:
