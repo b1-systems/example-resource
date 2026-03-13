@@ -4,9 +4,10 @@
  * summary: OpenID Connect example
  * */
 
-/* Demonstration of an OIDC "Resource Server", receiving an OAuth2 access token
-   and (for demonstration purpose) accessing the OIDC userinfo endpoint
-   * See also: https://openid.net/specs/openid-connect-core-1_0.html#UserInfo */
+/* Simple "Resource Server", receiving an OAuth2 access token
+   and (for demonstration purposes) accessing the OIDC userinfo
+   endpoint for the access token's subject identity
+   See also: https://openid.net/specs/openid-connect-core-1_0.html#UserInfo */
 
 package main
 
@@ -30,8 +31,8 @@ var (
 
 func main() {
   arr := []ini.Ref{
-    {"providerUrl", &providerUrl},
-    {"listenAddress", &listenAddress}}
+    {Name: "providerUrl", Value: &providerUrl},
+    {Name: "listenAddress", Value: &listenAddress}}
 
   err := ini.ReadIni(clientName, arr)
 
@@ -39,7 +40,6 @@ func main() {
     log.Fatal()
     os.Exit(1)
   }
-
 
   ctx := context.Background()
   provider, err := oidc.NewProvider(ctx, providerUrl)
@@ -72,11 +72,11 @@ func main() {
       })
 
       if _, err := tokenSource.Token(); err != nil {
-        log.Printf("Invalid access token: ", err)
+        log.Printf("Invalid access token: %s", err)
         http.Error(w, "Bad request", http.StatusBadRequest)
       } else {
         if userInfo, err := provider.UserInfo(ctx, tokenSource) ; err != nil {
-          log.Printf("Error getting UserInfo: ", err)
+          log.Printf("Error getting UserInfo: %s", err)
           http.Error(w, "Internal error", http.StatusInternalServerError)
         } else {
           var claims struct {
@@ -95,7 +95,7 @@ func main() {
           }
 
           if err := userInfo.Claims(&claims); err != nil {
-            log.Printf("Error parsing claims from UserInfo: ", err)
+            log.Printf("Error parsing claims from UserInfo: %s", err)
             http.Error(w, "Internal error", http.StatusInternalServerError)
           } else {
             data, err := json.MarshalIndent(claims, "", "    ")
@@ -103,10 +103,7 @@ func main() {
             if err != nil {
               http.Error(w, err.Error(), http.StatusInternalServerError)
             } else {
-              w.Write([]byte("--------"+clientName+"--------\r\n"))
-              w.Write([]byte("Parsed userinfo claims: "))
               w.Write(data)
-              w.Write([]byte("\r\n"))
             }
           }
         }
@@ -117,3 +114,5 @@ func main() {
   log.Printf("Listening on http://%s/", listenAddress)
   log.Fatal(http.ListenAndServe(listenAddress, nil))
 }
+
+/* vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab: */
